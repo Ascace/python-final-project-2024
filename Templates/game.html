@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="text-center">
+    <h2>Current Player: {{ current_player['name'] }}</h2>
+    <h3>Available Troops: {{ current_player['troops'] }}</h3>
+
+    <h3>World Map</h3>
+    <!-- Map Container -->
+    <div id="map-container">
+        <img src="{{ url_for('static', filename='images/worldmap.jpg') }}" usemap="#world-map" alt="World Map" style="max-width: 100%; height: auto;">
+
+        <!-- Clickable Map Areas -->
+        <map name="world-map">
+            {% for territory, data in territories.items() %}
+            <area
+                shape="rect"
+                coords="{{ data.coords }}"
+                href="#"
+                alt="{{ territory }}"
+                onclick="handleTerritoryClick('{{ territory }}', '{{ data.owner }}', {{ data.troops }})">
+            {% endfor %}
+        </map>
+    </div>
+
+    <!-- Dynamic Information Box -->
+    <div id="info-box" class="mt-4">
+        <p>Click on a territory to view or perform an action.</p>
+        <p id="territory-info"></p>
+    </div>
+
+    <!-- Territories Table -->
+    <h3 class="mt-4">Territories:</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Territory</th>
+                <th>Owner</th>
+                <th>Troops</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for territory, data in territories.items() %}
+            <tr>
+                <td>{{ territory }}</td>
+                <td>{{ data.owner }}</td>
+                <td>{{ data.troops }}</td>
+                <td>
+                    {% if data.owner == current_player['name'] %}
+                    <button onclick="reinforce('{{ territory }}')">Reinforce</button>
+                    {% elif data.owner %}
+                    <button onclick="attack('{{ territory }}')">Attack</button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('next_turn') }}" class="btn btn-primary mt-4">Next Turn</a>
+</div>
+
+<!-- JavaScript -->
+<script>
+    function handleTerritoryClick(territory, owner, troops) {
+    const infoBox = document.getElementById("info-box");
+    if (owner === "{{ current_player['name'] }}") {
+        infoBox.innerHTML = `You own ${territory} with ${troops} troops.
+            <button onclick="reinforce('${territory}')">Reinforce</button>`;
+    } else if (owner) {
+        infoBox.innerHTML = `Territory: ${territory}<br>Owner: ${owner}<br>Troops: ${troops}
+            <button onclick="attack('${territory}')">Attack</button>`;
+    } else {
+        infoBox.innerHTML = `Territory: ${territory}<br>This territory is unclaimed.`;
+    }
+}
+
+
+    function attack(territory) {
+    fetch("/attack", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ attacker: prompt("Your territory:"), defender: territory })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) alert(data.error);
+        else location.reload();  // Refresh game state
+    });
+}
+
+function reinforce(territory) {
+    const troops = prompt("How many troops to reinforce?");
+    fetch("/reinforce", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ player: "{{ current_player['name'] }}", territory, troops })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) alert(data.error);
+        else location.reload();  // Refresh game state
+    });
+}
+
+</script>
+{% endblock %}
+
+

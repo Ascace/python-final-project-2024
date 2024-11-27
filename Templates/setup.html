@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="POST" class="text-center">
+    <label for="num_players" class="form-label">Number of Players (2-6):</label>
+    <input type="number" id="num_players" name="num_players" min="2" max="6" class="form-control w-25 mx-auto" required>
+    <button type="submit" class="btn btn-success mt-3">Start</button>
+</form>
+{% endblock %}

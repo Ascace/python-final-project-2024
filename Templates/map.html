@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map</title>
+</head>
+<body>
+    <h1>World Map</h1>
+    <img src="worldmap.jpg" usemap="#image-map" alt="World Map">
+
+    <map name="image-map">
+        <area alt="Africa" title="Africa" href="javascript:void(0)" coords="249,178,251,184,259,184,264,195,269,187,277,184,284,194,287,201,291,209,295,217,300,222,303,229,305,234,313,233,319,233,319,242,312,250,305,257,298,265,297,274,299,280,300,286,295,289,289,299,287,307,285,312,279,320,271,325,262,325,255,309,257,317,248,297,253,300,248,287,250,279,250,268,247,261,244,249,239,237,231,239,221,241,211,244,204,237,203,228,199,220,197,209,199,195,205,185,213,179,205,191,234,177,227,177,241,177,218,177,323,284,323,273,325,290,319,304,320,298,314,284,306,288,302,297,305,307,305,313,311,312" shape="poly" onclick="regionClick('Africa')">
+        <area alt="South America" title="South America" href="javascript:void(0)" coords="99,184,107,181,121,181,114,183,130,181,135,184,144,193,164,201,184,213,115,239,112,261,114,290,119,316,131,327,128,306,138,285,151,267,168,249,175,229,182,223,168,208,155,199,178,208,97,192,97,200,95,220,102,233" shape="poly" onclick="regionClick('South America')">
+        <!-- Repeat for all regions -->
+    </map>
+
+    <script>
+        function regionClick(region) {
+            fetch('/region-click', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ region: region })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message))
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
